@@ -1,3 +1,6 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+?>
 <div class="wrap">
 	<h2>Goolytics - Simple Google Analytics</h2>
 	
@@ -13,14 +16,14 @@
 						
 					<tr valign="top">
 						<th scope="row"><label for="goolytics_web_property_id"><strong><?php _e('Google Analytics ID', 'goolytics-simple-google-analytics'); ?>:</strong><br /><small><a href="https://www.google.com/analytics/web/" target="_blank"><?php _e('(My Analytics accounts)', 'goolytics-simple-google-analytics'); ?></a></small></label></th>
-						<td><input type="text" style="width:130px;" id="goolytics_web_property_id" name="goolytics_web_property_id" value="<?php echo get_option('goolytics_web_property_id'); ?>" /> <small><?php _e('Example: UA-0000000-0', 'goolytics-simple-google-analytics'); ?></small></td>
+						<td><input type="text" style="width:130px;" id="goolytics_web_property_id" name="goolytics_web_property_id" value="<?php echo esc_attr( get_option('goolytics_web_property_id') ); ?>" /> <small><?php _e('Example: UA-0000000-0', 'goolytics-simple-google-analytics'); ?></small></td>
 					</tr>
 					<tr valign="top">
 						<th scope="row"><label for="goolytics_anonymize_ip"><strong><?php _e('Anonymize IP?', 'goolytics-simple-google-analytics'); ?>:</strong><br /><small><?php _e('(Recommended for german users)', 'goolytics-simple-google-analytics'); ?></small></label></th>
 						<td>
 							<select id="goolytics_anonymize_ip" name="goolytics_anonymize_ip" style="width:130px;">
-								<option value="0" <?php selected(get_option('goolytics_anonymize_ip'), 0); ?>><?php _e('No', 'goolytics-simple-google-analytics') ; ?></option>
-								<option value="1" <?php selected(get_option('goolytics_anonymize_ip'), 1); ?>><?php _e('Yes', 'goolytics-simple-google-analytics') ; ?></option>
+								<option value="0" <?php selected( (bool) get_option('goolytics_anonymize_ip'), false ); ?>><?php _e('No', 'goolytics-simple-google-analytics') ; ?></option>
+								<option value="1" <?php selected( (bool) get_option('goolytics_anonymize_ip'), true ); ?>><?php _e('Yes', 'goolytics-simple-google-analytics') ; ?></option>
 							</select>
 							<small><?php _e('Tells Google Analytics to anonymize the information sent by the tracker objects by removing the last octet of the IP address prior to its storage.', 'goolytics-simple-google-analytics'); ?></small>
 							<?php
@@ -34,8 +37,8 @@
 						<th scope="row"><label for="goolytics_usercentrics_support"><strong><?php _e('Enable Usercentrics Mode?', 'goolytics-simple-google-analytics'); ?>:</strong><br /><small><?php _e('(Consent Management Platform)', 'goolytics-simple-google-analytics'); ?></small></label></th>
 						<td>
 							<select id="goolytics_usercentrics_support" name="goolytics_usercentrics_support" style="width:130px;">
-								<option value="0" <?php selected(get_option('goolytics_usercentrics_support'), 0); ?>><?php _e('No', 'goolytics-simple-google-analytics') ; ?></option>
-								<option value="1" <?php selected(get_option('goolytics_usercentrics_support'), 1); ?>><?php _e('Yes', 'goolytics-simple-google-analytics') ; ?></option>
+								<option value="0" <?php selected( (bool) get_option('goolytics_usercentrics_support'), false ); ?>><?php _e('No', 'goolytics-simple-google-analytics') ; ?></option>
+								<option value="1" <?php selected( (bool) get_option('goolytics_usercentrics_support'), true ); ?>><?php _e('Yes', 'goolytics-simple-google-analytics') ; ?></option>
 							</select>
 							<small><?php echo __('<strong>Usercentrics subscription required!</strong> Alters the Universal Analytics code to be working with Usercentrics Consent Management Platform.', 'goolytics-simple-google-analytics') . ' ' . __('<a href="https://usercentrics.com/knowledge/direct-integration-usercentrics-script-website/" target="_blank">Additional steps required (see step 1)</a>!', 'goolytics-simple-google-analytics'); ?></small>
 							<?php

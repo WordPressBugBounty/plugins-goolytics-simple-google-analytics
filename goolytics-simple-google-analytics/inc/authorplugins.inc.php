@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 /**
  * File that holds all the author plugins functions
  *
@@ -11,7 +13,7 @@
  * Writes CSS and JS to the plugin page's header for displaying my other plugins
  *
  * @since 1.0
- * @author scripts@schloebe.de
+ * @author wordpress@schloebe.de
  */
 function goolytics_authorplugins_head() {
 	global $pagenow;
@@ -20,7 +22,8 @@ function goolytics_authorplugins_head() {
 	wp_enqueue_style( 'os_authorplugins_style', trailingslashit(plugins_url( 'css/', dirname(__FILE__) )) . "os_authorplugins_style.css", array(), GOOLYTICSVERSION );
 }
 
-if( $pagenow == 'options-general.php' && isset( $_GET['page'] ) && $_GET['page'] == 'goolytics' ) {
+global $pagenow;
+
+if( $pagenow == 'options-general.php' && isset( $_GET['page'] ) && $_GET['page'] === 'goolytics' ) {
 	add_action( "admin_print_scripts", 'goolytics_authorplugins_head' );
 }
-?>

@@ -3,7 +3,7 @@ Contributors: Alphawolf
 Donate link: https://www.schloebe.de/donate/
 Tags: analytics, web tracking, dsgvo, gdpr, usercentrics
 Requires at least: 3.0
-Tested up to: 6.9.99
+Tested up to: 7.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -44,6 +44,15 @@ None. Yet.
 1. Installation finished.
 
 == Changelog ==
+
+= 1.1.4 =
+* WordPress 7.1 compatibility
+* Security hardening release
+* Added direct file access protection (ABSPATH check) to all plugin files
+* Escaped the Google Analytics ID in the settings page input field and in the frontend tracking code output
+* Added sanitization callbacks for the Anonymize IP and Usercentrics options
+* Hardened the "More plugins by this author" JSONP output against markup injection (HTML-escaped fields, restricted links to http/https)
+* Minor cleanup: strict comparison for the settings page check
 
 = 1.1.3 =
 * WordPress 6.9 compatibility

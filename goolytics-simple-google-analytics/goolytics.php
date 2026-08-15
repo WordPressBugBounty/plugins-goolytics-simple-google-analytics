@@ -1,7 +1,7 @@
 <?php 
 /*
 Plugin Name: Goolytics - Simple Google Analytics
-Version: 1.1.3
+Version: 1.1.4
 Plugin URI: https://wordpress.org/plugins/goolytics-simple-google-analytics/
 Description: A simple Google Analytics solution that works without slowing down your WordPress installation.
 Author: Oliver Schl&ouml;be
@@ -26,6 +26,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 /**
  * The main plugin file
  *
@@ -36,12 +38,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 /**
  * Define the plugin version
  */
-define("GOOLYTICSVERSION", "1.1.3");
-
-/**
- * Define the global var GOOLYTICSMINWP, returning bool if at least WP 3.0 is running
- */
-define('GOOLYTICSMINWP', version_compare($GLOBALS['wp_version'], '2.9.999', '>'));
+const GOOLYTICSVERSION = "1.1.4";
 
 
 /** 
@@ -53,16 +50,20 @@ define('GOOLYTICSMINWP', version_compare($GLOBALS['wp_version'], '2.9.999', '>')
 * @author 		wordpress@schloebe.de
 */
 class Goolytics {
+	/**
+ 	* $textdomain_loaded is used to check if the textdomain has been loaded
+ 	*/
+	public $textdomain_loaded = false;
 	
 	/**
  	* _NAMESPACE is used mainly for gettext purposes
  	*/
-	const _NAMESPACE = 'goolytics';
+	public const _NAMESPACE = 'goolytics';
 	
 	/**
  	* _SETTINGS_AUTH_LEVEL controls who can see the plugin's options page
  	*/
-	const _SETTINGS_AUTH_LEVEL = 'manage_options';
+	public const _SETTINGS_AUTH_LEVEL = 'manage_options';
 	
 	
 	/**
@@ -76,11 +77,6 @@ class Goolytics {
  	*/		
 	public function __construct() {
 		$this->textdomain_loaded = false;
-		
-		if ( !GOOLYTICSMINWP ) {
-			add_action('admin_notices', array(&$this, 'require_wpversion_message'));
-			return;
-		}
 		
 		if( get_option('goolytics_web_property_id') == '' )
 			add_action('admin_notices', array(&$this, 'user_setup_notice'));
@@ -116,7 +112,7 @@ class Goolytics {
  	* @since 		1.0
  	* @author 		wordpress@schloebe.de
  	*/
-	function admin_init() {
+	public function admin_init() {
 		global $pagenow;
 		
 		if ( !function_exists("add_action") ) return;
@@ -125,10 +121,16 @@ class Goolytics {
 			'type' => 'string',
 			'sanitize_callback'	=> array(&$this, 'sanitize_web_property_id')
 		));
-		register_setting(self::_NAMESPACE, 'goolytics_anonymize_ip');
-		register_setting(self::_NAMESPACE, 'goolytics_usercentrics_support');
+		register_setting(self::_NAMESPACE, 'goolytics_anonymize_ip', array(
+			'type' => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean'
+		));
+		register_setting(self::_NAMESPACE, 'goolytics_usercentrics_support', array(
+			'type' => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean'
+		));
 		
-		if( $pagenow == 'options-general.php' && isset( $_GET['page'] ) && $_GET['page'] == 'goolytics' )
+		if( $pagenow == 'options-general.php' && isset( $_GET['page'] ) && $_GET['page'] === 'goolytics' )
 			require_once( trailingslashit(dirname (__FILE__)) . 'inc/authorplugins.inc.php');
 	}
 	
@@ -139,7 +141,7 @@ class Goolytics {
  	* @since 		1.0
  	* @author 		wordpress@schloebe.de
  	*/
-	function admin_menu_goolytics() {
+	public function admin_menu_goolytics() {
 		add_options_page('Goolytics - Simple Google Analytics', 'Goolytics', self::_SETTINGS_AUTH_LEVEL, self::_NAMESPACE, array(&$this, 'options_page_goolytics'));
 	}
 	
@@ -150,7 +152,7 @@ class Goolytics {
  	* @since 		1.0
  	* @author 		wordpress@schloebe.de
  	*/
-	function options_page_goolytics() {
+	public function options_page_goolytics() {
 		include( trailingslashit( dirname( __FILE__ ) ) . 'inc/options.php' );
 	}
 	
@@ -161,7 +163,7 @@ class Goolytics {
  	* @since 		1.0
  	* @author 		wordpress@schloebe.de
  	*/
-	function print_code() {
+	public function print_code() {
 		$web_property_id = get_option('goolytics_web_property_id');
 		$anonymize_ip = get_option('goolytics_anonymize_ip');
 		$usercentrics_support = get_option('goolytics_usercentrics_support');
@@ -172,16 +174,16 @@ class Goolytics {
 		}
 
 		$code = '<!-- Goolytics - Simple Google Analytics Begin -->' . PHP_EOL;
-		$code .= '<script' . $usercentrics_additional . ' async src="//www.googletagmanager.com/gtag/js?id=' . $web_property_id . '"></script>' . PHP_EOL;
+		$code .= '<script' . $usercentrics_additional . ' async src="//www.googletagmanager.com/gtag/js?id=' . esc_attr( $web_property_id ) . '"></script>' . PHP_EOL;
 		$code .= "<script" . $usercentrics_additional . ">";
 		$code .= "window.dataLayer = window.dataLayer || [];" . PHP_EOL;
 		$code .= "function gtag(){dataLayer.push(arguments);}" . PHP_EOL;
 		$code .= "gtag('js', new Date());" . PHP_EOL;
 		$code .= PHP_EOL;
 		if( $anonymize_ip ) {
-			$code .= "gtag('config', '" . $web_property_id . "', { 'anonymize_ip': true });" . PHP_EOL;
+			$code .= "gtag('config', '" . esc_attr( $web_property_id ) . "', { 'anonymize_ip': true });" . PHP_EOL;
 		} else {
-			$code .= "gtag('config', '" . $web_property_id . "');" . PHP_EOL;
+			$code .= "gtag('config', '" . esc_attr( $web_property_id ) . "');" . PHP_EOL;
 		}
 		$code .= "</script>" . PHP_EOL;
 		$code .= "<!-- Goolytics - Simple Google Analytics End -->" . PHP_EOL;
@@ -197,7 +199,7 @@ class Goolytics {
  	* @since 		1.0
  	* @author 		wordpress@schloebe.de
  	*/
-	function load_textdomain() {
+	public function load_textdomain() {
 		if($this->textdomain_loaded) return;
 		load_plugin_textdomain('goolytics-simple-google-analytics', false, dirname(plugin_basename(__FILE__)) . '/languages/');
 		$this->textdomain_loaded = true;
@@ -213,7 +215,7 @@ class Goolytics {
 	* @param		string $file
 	* @return		array $links
  	*/
-	function plugin_action_links( $links, $file ) {
+	public function plugin_action_links( $links, $file ) {
 		if ( $file == plugin_basename(__FILE__) ) {
 			$settings_link = '<a href="' . menu_page_url('goolytics', false) . '">' . __('Settings', 'goolytics-simple-google-analytics') .'</a>' ;
 			array_unshift($links, $settings_link);
@@ -229,7 +231,7 @@ class Goolytics {
  	* @since 		1.0
  	* @author 		wordpress@schloebe.de
  	*/
-	function user_setup_notice() {
+	public function user_setup_notice() {
 		echo "<div id='wpversionfailedmessage' class='updated settings-error'><p>" . sprintf(__('Thanks for activating Goolytics - Simple Google Analytics! Now head to the <a href="%s">settings page</a>, finish setting up the plugin and you are good to go!', 'goolytics-simple-google-analytics'), menu_page_url('goolytics', false)) . "</p></div>";
 	}
 	
@@ -242,7 +244,7 @@ class Goolytics {
  	* @since 		1.0
  	* @author 		wordpress@schloebe.de
  	*/
-	function require_wpversion_message() {
+	public function require_wpversion_message() {
 		echo "<div id='wpversionfailedmessage' class='error fade'><p>" . __('Goolytics - Simple Google Analytics requires at least WordPress 3.0!', 'goolytics-simple-google-analytics') . "</p></div>";
 	}
 	
@@ -253,7 +255,7 @@ class Goolytics {
  	* @since 		1.1.2
  	* @author 		wordpress@schloebe.de
  	*/
-	function sanitize_web_property_id( $input ) {
+	public function sanitize_web_property_id( string $input ) {
 		if( preg_match('/^[A-Z][A-Z0-9]?-[A-Z0-9]{4,10}(?:\-[1-9]\d{0,3})?$/', $input) ) {
 			return $input;
 		} else {
@@ -279,4 +281,3 @@ class Goolytics {
 }
 
 new Goolytics;
-?>
